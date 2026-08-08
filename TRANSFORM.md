@@ -41,6 +41,21 @@ publishes a release binary today: gantry is `cargo build` from a checkout,
 gxproof is `uv tool install gxproof`. If you do not already have one, do not
 install a toolchain just to start. Use the second way.
 
+**Check the scorer's answer before you build on it.** A static scan matches on
+conventional paths, and a project that puts things somewhere else scores 0 on
+primitives it is strong in. Run against a mature TypeScript platform, `gantry
+scan` was wrong on nine of twelve primitives: it reported 0 for verification on
+199 colocated `src/**/*.test.ts` files that CI gates on, 0 for durable state on
+a 50MB live database, and 3 for governance by matching the word `permission` in
+a GitHub Actions token scope, which is not agent authority at all.
+
+The overstated one is the dangerous one. A tool that only under-reads can be
+treated as a floor and acted on. One that moves in both directions cannot be a
+baseline, because the flattering number is the one nobody rechecks. Read every
+line the scan produces and confirm the evidence path says what the score claims.
+Where it does not, write the by-hand baseline instead and keep the scan output
+beside it as the record of what was wrong.
+
 **By hand, which is the fallback and is not a lesser one.** Score the twelve
 yourself against `adapters/plain-prompt/brief.md`, which carries the anchors and
 the four rules that change the arithmetic. Write
