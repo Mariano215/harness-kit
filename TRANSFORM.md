@@ -258,11 +258,30 @@ The prose in the proof documents is the reasoning; this file is the result, and
 it is what makes an assessment renderable and comparable across projects. When
 the two disagree, the prose is right and the file is stale.
 
-Then render it:
+Verify it, then render:
 
 ```
-python3 <harness-kit>/report/render.py <project-dir>
+python3 <harness-kit>/report/verify.py <project-dir> --run
+python3 <harness-kit>/report/render.py <project-dir> --run-sensors
 ```
+
+`verify.py` is the sensor for this kit's own output, and `render.py` refuses to
+write a page that fails it. It checks the twelve keys are present and in spec
+order, that a guide-only primitive is not scored above 3, that a row short of
+target states a gap, that the overall really is the minimum and `set_by` names a
+primitive actually at the floor, that `scores.yaml` is not older than the proof
+documents or the sensor sources it describes, and that every unenforced check id
+appears in an instruction file.
+
+`--run` executes each sensor's own check and fails when one is red, which is the
+strongest form of the question: the assessment claims this primitive is
+enforced, so run the enforcement. It is opt-in because it runs commands out of a
+YAML file, and a verifier pointed at someone else's repository that does that
+silently is its own finding.
+
+The first time this ran against a real assessment it failed, on a sensor whose
+recorded command was `vitest run ...` when the runnable form was `npx vitest
+run ...`. The score was right and the claim about how to check it was not.
 
 Two files, and neither installs anything into the assessed project:
 `harness/report.html`, one self-contained page with no external requests, safe to

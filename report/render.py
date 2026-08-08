@@ -21,6 +21,8 @@ import html
 import pathlib
 import sys
 
+from verify import verify
+
 try:
     import yaml
 except ImportError:
@@ -544,6 +546,10 @@ def main() -> int:
         default=pathlib.Path(__file__).resolve().parent.parent / "contracts.yaml",
         help="harness-kit contracts.yaml, the source of the level-4 requirement in each brief",
     )
+    ap.add_argument("--run-sensors", action="store_true",
+                    help="execute each sensor's check as part of verification (runs commands from scores.yaml)")
+    ap.add_argument("--force", action="store_true",
+                    help="render even when verification fails. The page will be wrong; label it draft.")
     args = ap.parse_args()
 
     scores = args.project / "harness" / "scores.yaml"
@@ -566,14 +572,19 @@ def main() -> int:
     contracts_doc = yaml.safe_load(args.contracts.read_text())
     contracts = {c["key"]: c for c in contracts_doc.get("contracts", [])}
 
-    # A brief built from a contract for a different vintage of the spec would
-    # quote requirements this assessment was not scored against.
-    if contracts_doc.get("spec_version") != data.get("spec_version"):
-        print(
-            f'warn: assessment is spec {data.get("spec_version")}, contracts are '
-            f'spec {contracts_doc.get("spec_version")}. Rescore or re-point --contracts.',
-            file=sys.stderr,
-        )
+    # A stale scores.yaml renders a confident, wrong page with confident, wrong
+    # work orders attached. Refuse rather than publish it.
+    report = verify(args.project, data, contracts_doc, run=args.run_sensors)
+    for w in report.warnings:
+        print(w, file=sys.stderr)
+    if not report.ok():
+        for f in report.failures:
+            print(f, file=sys.stderr)
+        print(f"\nFAIL {len(report.failures)} problem(s) in scores.yaml. Nothing rendered.", file=sys.stderr)
+        print("     Fix them, or pass --force to render anyway and label the result draft.", file=sys.stderr)
+        if not args.force:
+            return 1
+        print("warn: rendering anyway because --force was passed.", file=sys.stderr)
 
     out = args.out or (args.project / "harness" / "report.html")
     out.write_text(render(data, contracts))
