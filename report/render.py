@@ -36,6 +36,100 @@ ANCHORS = {
     5: "Compounding",
 }
 
+# Spec 0.2.0-draft section 2.2. Execution environment is exempt and sequenced
+# first by severity, because its gaps are security findings rather than maturity
+# observations. Anything unlisted falls after, in primitive order.
+REMEDIATION_ORDER = [
+    "execution_environment",
+    "tool_interface",
+    "context_management",
+    "durable_state",
+    "orchestration",
+    "instruction",
+]
+
+
+TRUST_LAYER = ("verification", "observability", "governance")
+
+
+def remediation_rank(key: str, all_keys: list, risk: str = "internal") -> int:
+    """Order the work.
+
+    The spec ranks by business risk first: verification, observability and
+    governance outrank everything for regulated or client-facing work, because
+    capability without trust is a liability. Only where risk is comparable does
+    the ablation-derived sequence break the tie. Execution environment is exempt
+    from both and sequenced first by severity, since its gaps are security
+    findings.
+
+    `risk` comes from scores.yaml. Defaulting to internal is the conservative
+    choice: it declines to reorder the list on an assumption the assessment did
+    not state.
+    """
+    if key == "execution_environment":
+        return 0
+    if risk in ("client_facing", "regulated") and key in TRUST_LAYER:
+        return 1 + TRUST_LAYER.index(key)
+    base = 10
+    if key in REMEDIATION_ORDER:
+        return base + REMEDIATION_ORDER.index(key)
+    return base + len(REMEDIATION_ORDER) + all_keys.index(key)
+
+
+def build_prompt(p: dict, contract: dict, project: str) -> str:
+    """The paste-into-your-agent brief for one gap.
+
+    Deliberately plain text and vendor-neutral: it goes into Claude Code, Codex,
+    Cursor or a chat window without editing. The generic half is the contract's
+    own level-4 text from harness-kit, so the requirement and its falsifying
+    check are the same words that defined the gap; the specific half is this
+    project's evidence and shortfall. Neither half is paraphrased, because a
+    paraphrased requirement is how a check ends up testing something adjacent.
+    """
+    target = str(p["target"])
+    spec = (contract.get("targets") or {}).get(target, {})
+    lines = [
+        f'Raise primitive {p["id"]} {p["name"]} from {p["current"]} to {p["target"]} in {project}.',
+        "",
+        "This is the twelve-primitive agent harness maturity model. The overall level is",
+        "the minimum across primitives, never the average, so this one is holding the",
+        "system down. A primitive carried only by a guide caps at 3: to reach 4 the rule",
+        "must be enforced by something that fails when it is broken.",
+        "",
+        "WHAT IS THERE NOW",
+        f'  {" ".join(str(p.get("evidence", "")).split())}',
+        "",
+        "THE GAP",
+        f'  {" ".join(str(p.get("gap") or "").split())}',
+        "",
+    ]
+    if spec.get("requirement"):
+        lines += [f"REQUIREMENT FOR LEVEL {target}", f'  {" ".join(spec["requirement"].split())}', ""]
+    if spec.get("artifact"):
+        lines += ["ARTIFACT TO PRODUCE", f'  {" ".join(spec["artifact"].split())}', ""]
+    if spec.get("check"):
+        lines += [
+            "ACCEPTANCE, AND THE ONLY THING THAT COUNTS AS DONE",
+            f'  {" ".join(spec["check"].split())}',
+            "",
+        ]
+    if contract.get("anti_pattern"):
+        lines += ["DO NOT SHIP THIS INSTEAD", f'  {" ".join(contract["anti_pattern"].split())}', ""]
+    lines += [
+        "RULES FOR THE WORK",
+        "  Read the code before proposing a change. Smallest diff that actually enforces",
+        "  the rule; no new dependency for something a few lines can do.",
+        "  The check must run on every change and must block, not warn. A check that",
+        "  reports and does not gate leaves this primitive at 3.",
+        "  Its failure message names the fix, not just the failure, because an agent",
+        "  reads that message and acts on it.",
+        "  Break the thing deliberately, watch the check go red, and paste that output",
+        "  into the proof. A check never observed failing has not been shown able to fail.",
+        "  Then name the check in the instruction file on the rule it carries, and remove",
+        "  that rule's unenforced marker.",
+    ]
+    return "\n".join(lines)
+
 CSS = """
 *,*::before,*::after{box-sizing:border-box}
 :root{
@@ -159,6 +253,43 @@ section{display:flex;flex-direction:column;gap:1rem}
 .card p{font-size:0.875rem;color:var(--slate)}
 .card .for{font-family:var(--mono);font-size:0.6875rem;color:var(--faint);text-transform:uppercase;letter-spacing:0.06em}
 
+/* Remediation -------------------------------------------------------- */
+.fix{background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.fix + .fix{margin-top:0.875rem}
+.fixhead{
+  display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;justify-content:space-between;
+  padding:0.9375rem 1.125rem;border-bottom:1px solid var(--rule);
+}
+.fixtitle{display:flex;align-items:baseline;gap:0.625rem;flex-wrap:wrap}
+.fixtitle .seq{
+  font-family:var(--mono);font-size:0.6875rem;color:var(--surface);background:var(--slate);
+  padding:0.125rem 0.4375rem;border-radius:3px;font-weight:600;
+}
+.fixtitle .name{font-weight:600}
+.fixtitle .move{font-family:var(--mono);font-size:0.8125rem;color:var(--slate);font-variant-numeric:tabular-nums}
+.fixwhy{padding:0 1.125rem 0.9375rem;color:var(--slate);font-size:0.875rem;max-width:64ch}
+button.copy{
+  font:inherit;font-family:var(--mono);font-size:0.75rem;font-weight:600;cursor:pointer;
+  background:var(--enforced);color:#fff;border:none;padding:0.4375rem 0.8125rem;border-radius:5px;
+}
+button.copy:hover{filter:brightness(1.08)}
+button.copy:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button.copy[data-done="1"]{background:var(--slate)}
+details.prompt{border-top:1px solid var(--rule)}
+details.prompt summary{
+  cursor:pointer;padding:0.6875rem 1.125rem;font-family:var(--mono);font-size:0.75rem;
+  color:var(--slate);list-style:none;
+}
+details.prompt summary::-webkit-details-marker{display:none}
+details.prompt summary::before{content:"\\25B8  ";color:var(--faint)}
+details.prompt[open] summary::before{content:"\\25BE  "}
+details.prompt pre{
+  margin:0;padding:0 1.125rem 1.125rem;overflow-x:auto;background:var(--sunken);
+  font-family:var(--mono);font-size:0.75rem;line-height:1.6;color:var(--ink);
+  white-space:pre-wrap;word-break:break-word;
+}
+.sev{font-family:var(--mono);font-size:0.6875rem;color:var(--floor);font-weight:600;letter-spacing:0.04em}
+
 /* Legend and footer -------------------------------------------------- */
 .legend{display:flex;flex-wrap:wrap;gap:1.25rem;font-size:0.8125rem;color:var(--slate)}
 .legend span{display:flex;align-items:center;gap:0.4375rem}
@@ -200,11 +331,12 @@ def track(baseline: int, current: int, target: int) -> str:
     )
 
 
-def render(data: dict) -> str:
+def render(data: dict, contracts: dict) -> str:
     overall = data.get("overall", {})
     prims = data.get("primitives", [])
     floor_key = overall.get("set_by")
     current = overall.get("current", 0)
+    project = data.get("project", "this project")
 
     rows = []
     for p in prims:
@@ -237,6 +369,43 @@ def render(data: dict) -> str:
         f'<code>{esc(s["check"])}</code></p></article>'
         for s in data.get("sensors", [])
     )
+
+    # Remediation, in the spec's order: security severity first, then the
+    # ablation-derived sequence, then everything else. The floor is called out
+    # wherever it lands, because closing it is the only work that moves overall.
+    keys = [p["key"] for p in prims]
+    risk = data.get("risk", "internal")
+    todo = sorted(
+        (p for p in prims if p["current"] < p["target"]),
+        key=lambda p: remediation_rank(p["key"], keys, risk),
+    )
+    fixes = []
+    for n, p in enumerate(todo, start=1):
+        contract = contracts.get(p["key"], {})
+        prompt = build_prompt(p, contract, project)
+        is_floor = p.get("key") == floor_key
+        why = (
+            "Closing this is the only work in this list that raises the overall level."
+            if is_floor
+            else "Raises this layer. The overall level will not move until the floor does."
+        )
+        sev = (
+            '<span class="sev">SECURITY SEVERITY</span>'
+            if p["key"] == "execution_environment"
+            else ""
+        )
+        fixes.append(
+            f'<article class="fix">'
+            f'<div class="fixhead"><div class="fixtitle">'
+            f'<span class="seq">{n}</span>'
+            f'<span class="name">{esc(p["name"])}</span>'
+            f'<span class="move">{p["current"]} &rarr; {p["target"]}</span>{sev}</div>'
+            f'<button class="copy" type="button" data-prompt="p{n}">Copy brief</button></div>'
+            f'<p class="fixwhy">{esc(" ".join(str(p.get("gap") or "").split()))} {why}</p>'
+            f'<details class="prompt"><summary>Show the brief</summary>'
+            f'<pre id="p{n}">{esc(prompt)}</pre></details>'
+            f"</article>"
+        )
 
     floor_name = next((p["name"] for p in prims if p.get("key") == floor_key), floor_key)
     moved = [p for p in prims if p["current"] > p["baseline"]]
@@ -309,6 +478,13 @@ def render(data: dict) -> str:
   <div class="cards">{gaps}</div>
 </section>
 
+<section>
+  <h2>Remediation</h2>
+  <p class="lede">One brief per gap. Security severity first, then {"the trust layer, because this work is " + esc(risk).replace("_", " ") + " and capability without trust is a liability" if risk in ("client_facing", "regulated") else "tools, context, state and orchestration ahead of instruction, because the gain localises there rather than in the prompt"}.
+  Each brief is plain text. Paste it into Claude Code, Codex, Cursor or a chat window unedited.</p>
+  {"".join(fixes) if fixes else '<p class="lede">Every row is at target. Nothing to remediate.</p>'}
+</section>
+
 <footer>
   <p>Assessed against the
   <a href="https://github.com/Mariano215/agent-harness-maturity">Agent Harness Maturity Specification</a>
@@ -319,6 +495,42 @@ def render(data: dict) -> str:
   Generated from <code>harness/scores.yaml</code>.</p>
 </footer>
 </div>
+<script>
+// Copy the brief. Falls back to selecting the text when the clipboard API is
+// unavailable, which it is on a plain file:// open in some browsers: better to
+// hand the reader a selection than a button that silently does nothing.
+document.querySelectorAll("button.copy").forEach(function (button) {{
+  button.addEventListener("click", function () {{
+    var pre = document.getElementById(button.dataset.prompt);
+    if (!pre) return;
+    var done = function (label) {{
+      button.textContent = label;
+      button.dataset.done = "1";
+      setTimeout(function () {{
+        button.textContent = "Copy brief";
+        delete button.dataset.done;
+      }}, 2000);
+    }};
+    var select = function () {{
+      var details = pre.closest("details");
+      if (details) details.open = true;
+      var range = document.createRange();
+      range.selectNodeContents(pre);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      done("Selected, press copy");
+    }};
+    if (navigator.clipboard && navigator.clipboard.writeText) {{
+      navigator.clipboard.writeText(pre.textContent).then(function () {{
+        done("Copied");
+      }}, select);
+    }} else {{
+      select();
+    }}
+  }});
+}});
+</script>
 """
 
 
@@ -326,6 +538,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("project", type=pathlib.Path, help="directory holding harness/scores.yaml")
     ap.add_argument("-o", "--out", type=pathlib.Path, help="output file (default: harness/report.html)")
+    ap.add_argument(
+        "--contracts",
+        type=pathlib.Path,
+        default=pathlib.Path(__file__).resolve().parent.parent / "contracts.yaml",
+        help="harness-kit contracts.yaml, the source of the level-4 requirement in each brief",
+    )
     args = ap.parse_args()
 
     scores = args.project / "harness" / "scores.yaml"
@@ -340,9 +558,47 @@ def main() -> int:
         print(f"FAIL {scores} has {count} primitives, expected 12.", file=sys.stderr)
         return 1
 
+    if not args.contracts.exists():
+        print(f"FAIL {args.contracts} not found.", file=sys.stderr)
+        print("     The remediation briefs quote the contract's own level-4 text.", file=sys.stderr)
+        print("     Point --contracts at harness-kit's contracts.yaml.", file=sys.stderr)
+        return 1
+    contracts_doc = yaml.safe_load(args.contracts.read_text())
+    contracts = {c["key"]: c for c in contracts_doc.get("contracts", [])}
+
+    # A brief built from a contract for a different vintage of the spec would
+    # quote requirements this assessment was not scored against.
+    if contracts_doc.get("spec_version") != data.get("spec_version"):
+        print(
+            f'warn: assessment is spec {data.get("spec_version")}, contracts are '
+            f'spec {contracts_doc.get("spec_version")}. Rescore or re-point --contracts.',
+            file=sys.stderr,
+        )
+
     out = args.out or (args.project / "harness" / "report.html")
-    out.write_text(render(data))
+    out.write_text(render(data, contracts))
+
+    briefs = args.project / "harness" / "remediation.md"
+    todo = sorted(
+        (p for p in data["primitives"] if p["current"] < p["target"]),
+        key=lambda p: remediation_rank(
+            p["key"], [x["key"] for x in data["primitives"]], data.get("risk", "internal")
+        ),
+    )
+    briefs.write_text(
+        f'# Remediation briefs: {data.get("project")}\n\n'
+        "In the spec's remediation order. Each block is plain text, paste it into your\n"
+        "agent unedited. Close one, prove it, then take the next.\n\n"
+        + "\n\n".join(
+            f'## {n}. {p["name"]} {p["current"]} to {p["target"]}\n\n```\n'
+            f'{build_prompt(p, contracts.get(p["key"], {}), data.get("project", ""))}\n```'
+            for n, p in enumerate(todo, start=1)
+        )
+        + "\n"
+    )
+
     print(f"OK {out} ({out.stat().st_size // 1024}KB, self-contained)")
+    print(f"OK {briefs} ({len(todo)} briefs, plain text)")
     return 0
 
 

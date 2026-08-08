@@ -264,9 +264,21 @@ Then render it:
 python3 <harness-kit>/report/render.py <project-dir>
 ```
 
-One self-contained HTML file at `harness/report.html`, no external requests, safe
-to hand to someone who will never clone the repository. It runs on your machine,
-never inside the assessed project, so nothing is installed into their tree.
+Two files, and neither installs anything into the assessed project:
+`harness/report.html`, one self-contained page with no external requests, safe to
+hand to someone who will never clone the repository; and
+`harness/remediation.md`, one plain-text brief per gap.
+
+Each brief fuses the contract's own level-4 requirement, artifact and falsifying
+check with this project's evidence and shortfall, so the acceptance criterion is
+the same sentence that defined the gap rather than a paraphrase of it. They are
+vendor-neutral plain text: paste one into Claude Code, Codex, Cursor or a chat
+window unedited. Close one, prove it, then take the next.
+
+Set `risk:` in `scores.yaml` to `internal`, `client_facing` or `regulated`. It
+decides the order of the briefs, because the spec puts verification,
+observability and governance ahead of everything for client-facing or regulated
+work. Execution environment stays first regardless, sequenced by severity.
 
 **Three artifacts prove the transform, never one number:**
 
