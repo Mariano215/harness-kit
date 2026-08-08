@@ -145,4 +145,4 @@ file and the actual controls in the same document.
 
 ---
 
-harness-kit contracts 0.1.0 · spec 0.1.0-draft
+harness-kit contracts 0.2.0 · spec 0.2.0-draft

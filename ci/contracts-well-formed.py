@@ -93,7 +93,7 @@ def main():
 
     # Definitions live in the spec. Restating them here is how drift starts.
     for entry in entries:
-        for borrowed in ("definition", "na_condition", "limit", "severity"):
+        for borrowed in ("definition", "na_condition", "limit", "severity", "control_type"):
             if borrowed in entry:
                 fail(
                     f"{entry.get('key')}: '{borrowed}' belongs to the spec and "

@@ -267,4 +267,4 @@ ordinary course of running the system, or they do not happen at all.
 
 ---
 
-harness-kit contracts 0.1.0 · spec 0.1.0-draft
+harness-kit contracts 0.2.0 · spec 0.2.0-draft

@@ -1,5 +1,5 @@
 {
-  "$comment": "Harness Kit adapter. Primitives 05 and 12: the declared permission surface, tracked in version control. Replace the BUILD/TEST placeholders in allow with this project's real commands and delete the rest of this sentence. Do not move these values into an untracked local settings file; that is undeclared authority, and it is the failure the drift check exists to catch. A permission prompt is an enforcement point, not a security boundary: pair this with a runtime that actually bounds the process. harness-kit contracts 0.1.0 · spec 0.1.0-draft",
+  "$comment": "Harness Kit adapter. Primitives 05 and 12: the declared permission surface, tracked in version control. Replace the BUILD/TEST placeholders in allow with this project's real commands and delete the rest of this sentence. Do not move these values into an untracked local settings file; that is undeclared authority, and it is the failure the drift check exists to catch. A permission prompt is an enforcement point, not a security boundary: pair this with a runtime that actually bounds the process. harness-kit contracts 0.2.0 · spec 0.2.0-draft",
   "permissions": {
     "defaultMode": "default",
     "allow": [

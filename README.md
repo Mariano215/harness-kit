@@ -119,7 +119,8 @@ attached. A third scoring path in this repository would be the failure mode. If
 a level-inference rule appears in `contracts.yaml`, it is a defect.
 
 **It does not restate the spec.** Contracts join upstream by `key`. Definitions,
-N/A conditions, limits and severities live there and are absent here on purpose.
+N/A conditions, limits, severities and control types live there and are absent
+here on purpose.
 Restating them is where drift starts.
 
 **It ships no toolchain.** No CLI, no package, no generator. A repository whose
@@ -133,7 +134,7 @@ would mean putting both rhetorics into the YAML.
 Two numbers, and every adapter carries them in a footer:
 
 ```
-harness-kit contracts 0.1.0 · spec 0.1.0-draft
+harness-kit contracts 0.2.0 · spec 0.2.0-draft
 ```
 
 `spec_version` is copied from upstream verbatim and never forked.

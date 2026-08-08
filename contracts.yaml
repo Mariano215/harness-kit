@@ -7,8 +7,12 @@
 # Licensed CC BY 4.0.
 #
 # JOIN, DO NOT RESTATE. Each entry keys to the spec by `key`. Definitions,
-# na_condition, limit and severity live in the spec and are deliberately absent
-# here. Restating them is where drift starts.
+# na_condition, limit, severity and control_type live in the spec and are
+# deliberately absent here. Restating them is where drift starts.
+#
+# control_type moved upstream in spec 0.2.0. The rule it produces, that a
+# primitive carried only by guides caps at 3, is now stated in the spec at
+# section 2.3, so the `cap` fields below carry only the exceptions to it.
 #
 # TIERS. Only 3 and 4 carry requirements. Levels 0 to 2 describe not having done
 # the thing. Level 5 is emergent and gets one unstructured line; a prescribed
@@ -29,8 +33,8 @@
 # gxproof and gantry do not read this file, and must not. A stale id costs an
 # inaccurate cross reference, never a broken scorer.
 
-contracts_version: "0.1.0"
-spec_version: "0.1.0-draft"
+contracts_version: "0.2.0"
+spec_version: "0.2.0-draft"
 
 contracts:
 

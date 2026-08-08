@@ -110,4 +110,4 @@ list is a complaint; a gap list with placement is a plan someone can staff.
 
 ---
 
-harness-kit contracts 0.1.0 · spec 0.1.0-draft
+harness-kit contracts 0.2.0 · spec 0.2.0-draft
