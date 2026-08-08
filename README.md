@@ -44,6 +44,7 @@ a refactor.
 | `TRANSFORM.md` | Seven steps to apply this to a project that already exists. Start here. |
 | `adapters/` | Instruction fragments to paste in: vendor-neutral, Claude Code, and a one-page brief for a chat with no filesystem. |
 | `docs/harness-engineering.md` | Guides and sensors, the control-type axis that makes level 4 testable rather than intuitive. |
+| `report/render.py` | Turns a finished assessment into one self-contained HTML page. Reviewer-side; nothing is installed into the assessed project. |
 
 ## Try it on a project
 

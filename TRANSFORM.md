@@ -252,6 +252,22 @@ documented as conventions other repositories use, never as a house layout to
 conform to. When the scan misses a real control, that is a probe to file
 upstream, and the negative controls are what carry the proof in the meantime.
 
+Write `harness/scores.yaml` as you go: the machine-readable answer, one entry
+per primitive with baseline, current, target, control type, evidence and the gap.
+The prose in the proof documents is the reasoning; this file is the result, and
+it is what makes an assessment renderable and comparable across projects. When
+the two disagree, the prose is right and the file is stale.
+
+Then render it:
+
+```
+python3 <harness-kit>/report/render.py <project-dir>
+```
+
+One self-contained HTML file at `harness/report.html`, no external requests, safe
+to hand to someone who will never clone the repository. It runs on your machine,
+never inside the assessed project, so nothing is installed into their tree.
+
 **Three artifacts prove the transform, never one number:**
 
 1. the scan delta against the committed baseline,
