@@ -193,6 +193,20 @@ failing. That is not pedantry: a check with an inverted condition, a typo in a
 path, or a grep that silently matches nothing will sit green forever and look
 exactly like a working control.
 
+**The scan delta is the weakest of the three artifacts, and you should expect it
+to understate the work.** A static read scores from conventional paths: `tests/`
+for verification, `logs/` or `telemetry/` for observability, `.mcp.json` for
+tools. A real harness at an unconventional path scores 0 with an honest "looked
+in X and Y, found nothing" behind it. The first run of this playbook against a
+Python bot moved one primitive on the scan while four blocking sensors, a
+chokepoint and a structured run record went unrecognised.
+
+Do not rename things to please the scanner. A number obtained that way is a
+compliment rather than a measurement, and the scanner's own probe list is
+documented as conventions other repositories use, never as a house layout to
+conform to. When the scan misses a real control, that is a probe to file
+upstream, and the negative controls are what carry the proof in the meantime.
+
 **Three artifacts prove the transform, never one number:**
 
 1. the scan delta against the committed baseline,
