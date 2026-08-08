@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: contracts.yaml parses and is complete
+        run: python3 ci/contracts-well-formed.py
+
+      - name: adapters state all twelve primitives
+        run: bash ci/adapters-cover-all-twelve.sh
+
+      # Consumers live in sibling repositories, so every path skips on a bare
+      # runner. Kept here so a failure is impossible to miss if this repo ever
+      # gains a checkout step for them.
+      - name: consumers cite the current version
+        run: bash ci/consumers-cite-current-version.sh

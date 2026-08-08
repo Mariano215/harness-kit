@@ -1,0 +1,18 @@
+# Downstream consumers of the twelve-primitive model, one path per line.
+# A path is relative to this repository's parent directory, or absolute, or
+# starts with ~ for the home directory.
+#
+# Each keeps its own deliberately lossy condensation: signals.yaml carries
+# false-positive tuning from real corpus runs, the review skill's rubric is
+# compressed for a context budget, gantry's copy is written for its scanner's
+# ceiling argument. Generating them from contracts.yaml would destroy the fit
+# that makes each one useful to its consumer.
+#
+# So the mechanism is citation, not vendoring. Each file names the version it
+# was last reconciled against, and consumers-cite-current-version.sh reports
+# where that has gone stale. A missing path is skipped, not failed: not every
+# checkout has every sibling.
+gxproof/src/gxproof/data/primitives.yaml
+gantry/docs/PRIMITIVES.md
+gantry/docs/HARNESS-ENGINEERING.md
+~/.claude/skills/harness-review/references/rubric.md
