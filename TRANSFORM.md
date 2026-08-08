@@ -225,6 +225,19 @@ failing. That is not pedantry: a check with an inverted condition, a typo in a
 path, or a grep that silently matches nothing will sit green forever and look
 exactly like a working control.
 
+**Then run the real entry point once, even when every negative control passed.**
+A negative control proves the check works. It does not prove the check is
+*wired* in the right place, and those are different defects. On the second real
+transform, six negative controls passed against a run recorder whose unit tests
+were all green, and the first smoke against the actual entry point produced an
+empty log: the recorder had been placed after a call that throws, so a run that
+failed early left no trace at all. That is the exact hole the primitive exists
+to close, sitting inside the code written to close it, invisible to every test
+of the component and obvious the moment the real path ran.
+
+The rule generalises. Tests exercise the thing you wrote. The smoke exercises
+where you put it.
+
 **The scan delta is the weakest of the three artifacts, and you should expect it
 to understate the work.** A static read scores from conventional paths: `tests/`
 for verification, `logs/` or `telemetry/` for observability, `.mcp.json` for
