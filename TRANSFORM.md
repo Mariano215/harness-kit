@@ -31,15 +31,32 @@ this document depends on them.
 
 ## 1. Baseline
 
+You need a number before you change anything, with evidence behind every score.
+There are two ways to get one and the second needs nothing installed.
+
+**With a scorer.** `gantry scan . > harness/baseline.txt` reads the repository
+statically and caps at 3, because a static read cannot see enforcement actually
+firing. `gxproof score .` reads a run ledger and can award 4. Note that neither
+publishes a release binary today: gantry is `cargo build` from a checkout,
+gxproof is `uv tool install gxproof`. If you do not already have one, do not
+install a toolchain just to start. Use the second way.
+
+**By hand, which is the fallback and is not a lesser one.** Score the twelve
+yourself against `adapters/plain-prompt/brief.md`, which carries the anchors and
+the four rules that change the arithmetic. Write
+`harness/baseline.txt` in this shape, one line per primitive:
+
 ```
-gantry scan . > harness/baseline.txt
+primitive 04 Tool interface | 0 | looked in tools/, .mcp.json, the model call
+                                  site in app/agent.py: no registry, tools are
+                                  dispatched by name through a match statement
 ```
 
-Commit it. That is the number: the minimum across twelve, capped at 3 because a
-static read of a repository cannot see enforcement actually firing, with a file
-path or an explicit "looked in X and Y, found nothing" behind every score.
+The format is the discipline: a score, then a path or an explicit "looked in X
+and Y, found nothing". A score without evidence is an opinion, and the whole
+transform is measured against this file later.
 
-If the project already emits a run ledger, also record `gxproof score .`.
+Commit it either way.
 
 Where the two disagree, do not average them. The static read under-reads a
 running system and over-reads a dead one. The telemetry number measured

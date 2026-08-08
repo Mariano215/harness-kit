@@ -1,4 +1,12 @@
-# harness-kit
+```
+█  █  ██  ███  █  █ ████  ███  ███    █  █ ███ ████
+█  █ █  █ █  █ ██ █ █    █    █       █ █   █    █
+████ ████ ███  █ ██ ███   ██   ██     ██    █    █
+█  █ █  █ █ █  █  █ █       █    █    █ █   █    █
+█  █ █  █ █  █ █  █ ████ ███  ███     █  █ ███   █
+
+        a g e n t   =   m o d e l   +   h a r n e s s
+```
 
 The prescriptive half of the Agent Harness Maturity Specification.
 
@@ -36,6 +44,42 @@ a refactor.
 | `TRANSFORM.md` | Seven steps to apply this to a project that already exists. Start here. |
 | `adapters/` | Instruction fragments to paste in: vendor-neutral, Claude Code, and a one-page brief for a chat with no filesystem. |
 | `docs/harness-engineering.md` | Guides and sensors, the control-type axis that makes level 4 testable rather than intuitive. |
+
+## Try it on a project
+
+Nothing to install. Pick a project that actually calls a model, and give it an
+hour.
+
+**1. Baseline it.** Read `adapters/plain-prompt/brief.md`, score the twelve
+yourself, and write `harness/baseline.txt` with a path or an explicit "looked in
+X and Y, found nothing" behind every number. A score without evidence is an
+opinion, and this file is what the whole transform is measured against later. If
+you already run `gantry scan` or `gxproof score`, use that instead; neither ships
+a release binary yet, so do not install a toolchain just to start.
+
+**2. Decide what done means.** Write `harness/target.yaml`: twelve lines, each
+one a target level or `na` with the reason. Most rows are 3. The trust layer is 4
+if the work is client-facing or regulated. **Without this file the transform has
+no terminating condition** and you will keep adding scaffolding forever.
+
+**3. Drop in one adapter.** They are standalone; use one, not several.
+`adapters/agents/AGENTS.md` is the default. Fill in every angle-bracket
+placeholder with a real path. An unfilled placeholder is a rule you have not
+adopted, so delete it or fill it.
+
+**4. Add two sensors.** Take the level-4 `check` text from two contracts
+literally and make them run. Start with whichever primitive your baseline scored
+lowest that the workload actually exercises.
+
+**5. Break them.** Deliberately violate each check, watch it go red, paste the
+output into `harness/proof/01.md`. A check that has never failed has not been
+shown to be capable of failing, and this step is what separates a 3 from a 4.
+
+If you only do steps 1, 2 and 5, you have still learned more about the system
+than a scan would tell you. Step 3 alone teaches you nothing: it adds a document.
+
+`TRANSFORM.md` is the full seven-step version with the ordering rules, the stop
+rule, and what to do when the scan understates your work.
 
 ## The `check` field is the point
 
