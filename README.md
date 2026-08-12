@@ -56,7 +56,7 @@ hour.
 yourself, and write `harness/baseline.txt` with a path or an explicit "looked in
 X and Y, found nothing" behind every number. A score without evidence is an
 opinion, and this file is what the whole transform is measured against later. If
-you already run `gantry scan` or `gxproof score`, use that instead; neither ships
+you already run `trunnion scan` or `gxproof score`, use that instead; neither ships
 a release binary yet, so do not install a toolchain just to start.
 
 **2. Decide what done means.** Write `harness/target.yaml`: twelve lines, each
@@ -115,7 +115,7 @@ schemas" is not a property.
 ## What this deliberately does not do
 
 **It does not score.** Two scorers already exist:
-[gantry](https://github.com/Mariano215/gantry) reads a repository statically and
+[trunnion](https://github.com/Mariano215/trunnion) reads a repository statically and
 caps at 3, and gxproof scores from a run ledger with the regulatory clause
 attached. A third scoring path in this repository would be the failure mode. If
 a level-inference rule appears in `contracts.yaml`, it is a defect.
@@ -144,7 +144,7 @@ harness-kit contracts 0.2.0 · spec 0.2.0-draft
 than spec prose. Eighteen months from now that footer is how you tell which
 vintage is sitting in a client's `AGENTS.md`.
 
-Downstream consumers (gantry, gxproof, the harness-review skill) keep their own
+Downstream consumers (trunnion, gxproof, the harness-review skill) keep their own
 deliberately lossy condensations and cite the version they were last reconciled
 against. `ci/consumers-cite-current-version.sh` reports staleness. It is a
 report, not a sync tool: the condensations are lossy on purpose and generating

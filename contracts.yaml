@@ -30,7 +30,7 @@
 # pydantic" is not portable. "Have good schemas" is not a property.
 #
 # `signals` cites gxproof signal ids for traceability. The citation is one way:
-# gxproof and gantry do not read this file, and must not. A stale id costs an
+# gxproof and trunnion do not read this file, and must not. A stale id costs an
 # inaccurate cross reference, never a broken scorer.
 
 contracts_version: "0.2.0"

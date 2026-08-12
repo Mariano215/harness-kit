@@ -34,16 +34,16 @@ this document depends on them.
 You need a number before you change anything, with evidence behind every score.
 There are two ways to get one and the second needs nothing installed.
 
-**With a scorer.** `gantry scan . > harness/baseline.txt` reads the repository
+**With a scorer.** `trunnion scan . > harness/baseline.txt` reads the repository
 statically and caps at 3, because a static read cannot see enforcement actually
 firing. `gxproof score .` reads a run ledger and can award 4. Note that neither
-publishes a release binary today: gantry is `cargo build` from a checkout,
+publishes a release binary today: trunnion is `cargo build` from a checkout,
 gxproof is `uv tool install gxproof`. If you do not already have one, do not
 install a toolchain just to start. Use the second way.
 
 **Check the scorer's answer before you build on it.** A static scan matches on
 conventional paths, and a project that puts things somewhere else scores 0 on
-primitives it is strong in. Run against a mature TypeScript platform, `gantry
+primitives it is strong in. Run against a mature TypeScript platform, `trunnion
 scan` was wrong on nine of twelve primitives: it reported 0 for verification on
 199 colocated `src/**/*.test.ts` files that CI gates on, 0 for durable state on
 a 50MB live database, and 3 for governance by matching the word `permission` in
@@ -145,7 +145,7 @@ says the project acquired documentation.
 
 Every rule you keep and cannot yet back carries the unenforced token followed by
 the id of the check that would close it, on the rule's own line. Those markers
-are the work list for step 4, and `gantry scan` reads them out of `CLAUDE.md`,
+are the work list for step 4, and `trunnion scan` reads them out of `CLAUDE.md`,
 `AGENTS.md` and `.cursorrules` for free.
 
 ---
@@ -210,7 +210,7 @@ without any extra work.
 Re-run the scan and diff it:
 
 ```
-gantry scan . > harness/after.txt
+trunnion scan . > harness/after.txt
 diff harness/baseline.txt harness/after.txt
 ```
 
@@ -328,7 +328,7 @@ scan wins on existence. The scan found a file; the review read it.
 ## What this does not do
 
 It does not score. Two scorers exist and a third would be the failure this kit
-was built to avoid. `contracts.yaml` states requirements; `gantry scan` and
+was built to avoid. `contracts.yaml` states requirements; `trunnion scan` and
 `gxproof score` decide levels; the spec decides what a level means.
 
 It does not make the project safe. Primitive 05 gaps are security findings, and
